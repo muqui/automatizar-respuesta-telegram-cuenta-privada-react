@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API = 'http://161.97.98.135:3006/announcement';
+const API = 'http://161.97.98.135:3001/announcement';
 
 export const getAnnouncements = () => axios.get(API);
 
