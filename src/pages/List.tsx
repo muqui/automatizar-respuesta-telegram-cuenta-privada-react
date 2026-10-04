@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import {
   getAnnouncements,
@@ -57,7 +58,7 @@ export default function List() {
       startTime: formatTime(selected.startTime),
       endTime: formatTime(selected.endTime),
       isActive: selected.isActive,
-      savedMessageId: Number(selected.savedMessageId), // 🔥 importante
+      savedMessageId: Number(selected.savedMessageId),
     };
 
     if (isCreating) {
@@ -71,148 +72,258 @@ export default function List() {
   };
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between mb-4">
-        <h1 className="text-2xl font-bold">Anuncios</h1>
+    <div className="min-h-screen bg-gray-50 p-3 sm:p-5 md:p-6 lg:p-8">
+      {/* ENCABEZADO */}
+      <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800 sm:text-3xl">
+            Anuncios
+          </h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Administra tus anuncios y su estado
+          </p>
+        </div>
 
         <button
           onClick={handleCreateOpen}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+          className="w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 active:scale-[0.98] sm:w-auto sm:py-2.5"
         >
           + Nuevo anuncio
         </button>
       </div>
 
       {/* TABLA */}
-      <div className="overflow-x-auto">
-        <table className="w-full border rounded-xl overflow-hidden shadow">
-          <thead className="bg-gray-100">
-            <tr>
-              <th className="p-3 text-left">ID</th>
-              <th className="p-3 text-left">Nombre</th>
-              <th className="p-3 text-left">Estado</th>
-              <th className="p-3 text-left">Fecha Inicio</th>
-              <th className="p-3 text-left">Acciones</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {data.map((a) => (
-              <tr key={a.id} className="border-t hover:bg-gray-50">
-                <td className="p-3">{a.id}</td>
-                <td className="p-3">{a.name}</td>
-
-                {/* 🔥 BADGE con ancho fijo */}
-                <td className="p-3">
-                  <span
-                    className={`inline-block w-20 px-2 py-1 rounded text-white text-sm text-center ${
-                      a.isActive ? "bg-green-500" : "bg-red-500"
-                    }`}
-                  >
-                    {a.isActive ? "Activo" : "Inactivo"}
-                  </span>
-                </td>
-
-                <td className="p-3">{a.startDate}</td>
-
-                <td className="p-3 flex gap-2">
-                  {/* 🔥 BOTÓN toggle con ancho fijo */}
-                  <button
-                    onClick={() => toggleActive(a)}
-                    className={`w-28 px-3 py-1 rounded text-white text-sm text-center ${
-                      a.isActive
-                        ? "bg-red-500 hover:bg-red-600"
-                        : "bg-green-500 hover:bg-green-600"
-                    }`}
-                  >
-                    {a.isActive ? "Desactivar" : "Activar"}
-                  </button>
-
-                  {/* 🔥 BOTÓN editar con ancho fijo */}
-                  <button
-                    onClick={() => handleEdit(a)}
-                    className="w-28 px-3 py-1 rounded bg-blue-500 text-white text-sm hover:bg-blue-600 text-center"
-                  >
-                    Editar
-                  </button>
-                </td>
+      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[650px] border-collapse text-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="whitespace-nowrap px-4 py-4 text-left font-semibold text-gray-600">
+                  ID
+                </th>
+                <th className="whitespace-nowrap px-4 py-4 text-left font-semibold text-gray-600">
+                  Nombre
+                </th>
+                <th className="whitespace-nowrap px-4 py-4 text-left font-semibold text-gray-600">
+                  Estado
+                </th>
+                <th className="whitespace-nowrap px-4 py-4 text-left font-semibold text-gray-600">
+                  Fecha Inicio
+                </th>
+                <th className="whitespace-nowrap px-4 py-4 text-center font-semibold text-gray-600">
+                  Acciones
+                </th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {data.map((a) => (
+                <tr
+                  key={a.id}
+                  className="border-t border-gray-100 transition-colors hover:bg-gray-50"
+                >
+                  <td className="whitespace-nowrap px-4 py-4 text-gray-600">
+                    {a.id}
+                  </td>
+
+                  <td className="max-w-[220px] truncate px-4 py-4 font-medium text-gray-800">
+                    {a.name}
+                  </td>
+
+                  <td className="whitespace-nowrap px-4 py-4">
+                    <span
+                      className={`inline-flex w-20 items-center justify-center rounded-full px-2 py-1 text-xs font-semibold ${
+                        a.isActive
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {a.isActive ? "Activo" : "Inactivo"}
+                    </span>
+                  </td>
+
+                  <td className="whitespace-nowrap px-4 py-4 text-gray-600">
+                    {a.startDate}
+                  </td>
+
+                  <td className="px-4 py-4">
+                    <div className="flex items-center justify-center gap-2">
+                      <button
+                        onClick={() => toggleActive(a)}
+                        className={`min-w-24 rounded-lg px-3 py-2 text-xs font-semibold text-white transition active:scale-95 ${
+                          a.isActive
+                            ? "bg-red-500 hover:bg-red-600"
+                            : "bg-green-500 hover:bg-green-600"
+                        }`}
+                      >
+                        {a.isActive ? "Desactivar" : "Activar"}
+                      </button>
+
+                      <button
+                        onClick={() => handleEdit(a)}
+                        className="min-w-20 rounded-lg bg-blue-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-600 active:scale-95"
+                      >
+                        Editar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+
+              {data.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-4 py-10 text-center text-gray-500"
+                  >
+                    No hay anuncios registrados
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* INDICADOR MOVIL */}
+        <div className="border-t border-gray-100 bg-gray-50 px-4 py-2 text-center text-xs text-gray-400 sm:hidden">
+          Desliza horizontalmente para ver más información
+        </div>
       </div>
 
       {/* MODAL */}
       {open && selected && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
-          <div className="bg-white rounded-xl p-6 w-[400px] shadow-lg">
-            <h2 className="text-xl font-bold mb-4">
-              {isCreating ? "Nuevo anuncio" : "Editar anuncio"}
-            </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-sm sm:p-5">
+          <div className="my-auto flex max-h-[calc(100dvh-24px)] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-40px)]">
+            {/* CABECERA MODAL */}
+            <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 sm:px-6">
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">
+                  {isCreating ? "Nuevo anuncio" : "Editar anuncio"}
+                </h2>
+                <p className="mt-1 text-xs text-gray-500">
+                  Completa la información del anuncio
+                </p>
+              </div>
 
-            <div className="flex flex-col gap-3">
-              <input
-                className="border p-2 rounded"
-                placeholder="Nombre"
-                value={selected.name || ""}
-                onChange={(e) =>
-                  setSelected({ ...selected, name: e.target.value })
-                }
-              />
+              <button
+                onClick={() => setOpen(false)}
+                className="flex h-9 w-9 items-center justify-center rounded-full text-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-800"
+                aria-label="Cerrar"
+              >
+                &times;
+              </button>
+            </div>
 
-              <input
-                type="date"
-                className="border p-2 rounded"
-                value={selected.startDate || ""}
-                onChange={(e) =>
-                  setSelected({ ...selected, startDate: e.target.value })
-                }
-              />
+            {/* CONTENIDO MODAL */}
+            <div className="flex flex-col gap-4 overflow-y-auto px-5 py-5 sm:px-6">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-gray-700">
+                  Nombre
+                </label>
+                <input
+                  className="w-full rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder="Nombre del anuncio"
+                  value={selected.name || ""}
+                  onChange={(e) =>
+                    setSelected({ ...selected, name: e.target.value })
+                  }
+                />
+              </div>
 
-              <input
-                type="date"
-                className="border p-2 rounded"
-                value={selected.endDate || ""}
-                onChange={(e) =>
-                  setSelected({ ...selected, endDate: e.target.value })
-                }
-              />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-gray-700">
+                    Fecha de inicio
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full min-w-0 rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    value={selected.startDate || ""}
+                    onChange={(e) =>
+                      setSelected({
+                        ...selected,
+                        startDate: e.target.value,
+                      })
+                    }
+                  />
+                </div>
 
-              <input
-                type="time"
-                className="border p-2 rounded"
-                value={selected.startTime || ""}
-                onChange={(e) =>
-                  setSelected({ ...selected, startTime: e.target.value })
-                }
-              />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-gray-700">
+                    Fecha de fin
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full min-w-0 rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    value={selected.endDate || ""}
+                    onChange={(e) =>
+                      setSelected({
+                        ...selected,
+                        endDate: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
 
-              <input
-                type="time"
-                className="border p-2 rounded"
-                value={selected.endTime || ""}
-                onChange={(e) =>
-                  setSelected({ ...selected, endTime: e.target.value })
-                }
-              />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-gray-700">
+                    Hora de inicio
+                  </label>
+                  <input
+                    type="time"
+                    className="w-full min-w-0 rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    value={selected.startTime || ""}
+                    onChange={(e) =>
+                      setSelected({
+                        ...selected,
+                        startTime: e.target.value,
+                      })
+                    }
+                  />
+                </div>
 
-              {/* 🔥 NUEVO CAMPO */}
-              <input
-                type="number"
-                className="border p-2 rounded"
-                placeholder="Saved Message ID"
-                value={selected.savedMessageId || ""}
-                onChange={(e) =>
-                  setSelected({
-                    ...selected,
-                    savedMessageId: e.target.value,
-                  })
-                }
-              />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-medium text-gray-700">
+                    Hora de fin
+                  </label>
+                  <input
+                    type="time"
+                    className="w-full min-w-0 rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    value={selected.endTime || ""}
+                    onChange={(e) =>
+                      setSelected({
+                        ...selected,
+                        endTime: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+              </div>
 
-              <label className="flex items-center gap-2">
+              <div className="flex flex-col gap-1.5">
+                <label className="text-sm font-medium text-gray-700">
+                  Saved Message ID
+                </label>
+                <input
+                  type="number"
+                  className="w-full rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder="ID del mensaje guardado"
+                  value={selected.savedMessageId || ""}
+                  onChange={(e) =>
+                    setSelected({
+                      ...selected,
+                      savedMessageId: e.target.value,
+                    })
+                  }
+                />
+              </div>
+
+              <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition hover:bg-gray-100">
                 <input
                   type="checkbox"
+                  className="h-5 w-5 accent-green-600"
                   checked={!!selected.isActive}
                   onChange={(e) =>
                     setSelected({
@@ -221,21 +332,24 @@ export default function List() {
                     })
                   }
                 />
-                Activo
+                <span className="text-sm font-medium text-gray-700">
+                  Activar anuncio
+                </span>
               </label>
             </div>
 
-            <div className="flex justify-end gap-2 mt-5">
+            {/* ACCIONES MODAL */}
+            <div className="flex flex-col-reverse gap-2 border-t border-gray-100 bg-gray-50 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
               <button
                 onClick={() => setOpen(false)}
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="w-full rounded-lg bg-gray-200 px-5 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-300 sm:w-auto sm:py-2.5"
               >
                 Cancelar
               </button>
 
               <button
                 onClick={handleSave}
-                className="px-4 py-2 bg-blue-500 text-white rounded"
+                className="w-full rounded-lg bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 active:scale-[0.98] sm:w-auto sm:py-2.5"
               >
                 Guardar
               </button>
