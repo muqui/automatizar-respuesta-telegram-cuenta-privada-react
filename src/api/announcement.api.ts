@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API = 'http://161.97.98.135:3001/announcement';
+// 🔥 URL desde .env de Vite
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3008';
+
+const API = `${API_URL}/announcement`;
 
 export const getAnnouncements = () => axios.get(API);
 

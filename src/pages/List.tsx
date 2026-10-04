@@ -102,9 +102,10 @@ export default function List() {
                 <td className="p-3">{a.id}</td>
                 <td className="p-3">{a.name}</td>
 
+                {/* 🔥 BADGE con ancho fijo */}
                 <td className="p-3">
                   <span
-                    className={`px-2 py-1 rounded text-white text-sm ${
+                    className={`inline-block w-20 px-2 py-1 rounded text-white text-sm text-center ${
                       a.isActive ? "bg-green-500" : "bg-red-500"
                     }`}
                   >
@@ -115,9 +116,10 @@ export default function List() {
                 <td className="p-3">{a.startDate}</td>
 
                 <td className="p-3 flex gap-2">
+                  {/* 🔥 BOTÓN toggle con ancho fijo */}
                   <button
                     onClick={() => toggleActive(a)}
-                    className={`px-3 py-1 rounded text-white text-sm ${
+                    className={`w-28 px-3 py-1 rounded text-white text-sm text-center ${
                       a.isActive
                         ? "bg-red-500 hover:bg-red-600"
                         : "bg-green-500 hover:bg-green-600"
@@ -126,9 +128,10 @@ export default function List() {
                     {a.isActive ? "Desactivar" : "Activar"}
                   </button>
 
+                  {/* 🔥 BOTÓN editar con ancho fijo */}
                   <button
                     onClick={() => handleEdit(a)}
-                    className="px-3 py-1 rounded bg-blue-500 text-white text-sm hover:bg-blue-600"
+                    className="w-28 px-3 py-1 rounded bg-blue-500 text-white text-sm hover:bg-blue-600 text-center"
                   >
                     Editar
                   </button>
