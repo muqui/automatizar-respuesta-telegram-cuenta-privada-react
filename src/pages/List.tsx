@@ -92,10 +92,90 @@ export default function List() {
         </button>
       </div>
 
-      {/* TABLA */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+      {/* TARJETAS PARA MOVIL */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:hidden">
+        {data.map((a) => (
+          <div
+            key={a.id}
+            className="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
+          >
+            {/* NOMBRE Y ESTADO */}
+            <div className="mb-4 flex min-w-0 items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="mb-1 text-xs font-medium text-gray-400">
+                  Anuncio #{a.id}
+                </p>
+                <h2 className="break-words text-base font-bold text-gray-800">
+                  {a.name}
+                </h2>
+              </div>
+
+              <span
+                className={`shrink-0 rounded-full px-3 py-1 text-xs font-semibold ${
+                  a.isActive
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
+                }`}
+              >
+                {a.isActive ? "Activo" : "Inactivo"}
+              </span>
+            </div>
+
+            {/* INFORMACION */}
+            <div className="mb-4 space-y-3 rounded-lg bg-gray-50 p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm text-gray-500">
+                  <span className="mr-2 inline-block align-middle text-gray-400">
+                    📅
+                  </span>
+                  Fecha de inicio
+                </span>
+                <span className="text-right text-sm font-medium text-gray-800">
+                  {a.startDate || "No definida"}
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm text-gray-500">
+                  <span className="mr-2 inline-block align-middle text-gray-400">
+                    📅
+                  </span>
+                  Fecha de fin
+                </span>
+                <span className="text-right text-sm font-medium text-gray-800">
+                  {a.endDate || "No definida"}
+                </span>
+              </div>
+            </div>
+
+            {/* ACCIONES */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => toggleActive(a)}
+                className={`flex-1 rounded-lg px-2 py-2.5 text-sm font-semibold text-white transition active:scale-95 ${
+                  a.isActive
+                    ? "bg-red-500 hover:bg-red-600"
+                    : "bg-green-500 hover:bg-green-600"
+                }`}
+              >
+                {a.isActive ? "Desactivar" : "Activar"}
+              </button>
+
+              <button
+                onClick={() => handleEdit(a)}
+                className="flex-1 rounded-lg bg-blue-600 px-2 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-95"
+              >
+                Editar
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* TABLA PARA ESCRITORIO */}
+      <div className="hidden overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:block">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[650px] border-collapse text-sm">
+          <table className="w-full border-collapse text-sm">
             <thead className="bg-gray-100">
               <tr>
                 <th className="whitespace-nowrap px-4 py-4 text-left font-semibold text-gray-600">
@@ -169,24 +249,8 @@ export default function List() {
                   </td>
                 </tr>
               ))}
-
-              {data.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={5}
-                    className="px-4 py-10 text-center text-gray-500"
-                  >
-                    No hay anuncios registrados
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
-        </div>
-
-        {/* INDICADOR MOVIL */}
-        <div className="border-t border-gray-100 bg-gray-50 px-4 py-2 text-center text-xs text-gray-400 sm:hidden">
-          Desliza horizontalmente para ver más información
         </div>
       </div>
 
@@ -194,7 +258,7 @@ export default function List() {
       {open && selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-sm sm:p-5">
           <div className="my-auto flex max-h-[calc(100dvh-24px)] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-40px)]">
-            {/* CABECERA MODAL */}
+            {/* CABECERA */}
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 sm:px-6">
               <div>
                 <h2 className="text-xl font-bold text-gray-800">
@@ -207,14 +271,14 @@ export default function List() {
 
               <button
                 onClick={() => setOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-full text-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-800"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl text-gray-500 transition hover:bg-gray-100 hover:text-gray-800"
                 aria-label="Cerrar"
               >
                 &times;
               </button>
             </div>
 
-            {/* CONTENIDO MODAL */}
+            {/* FORMULARIO */}
             <div className="flex flex-col gap-4 overflow-y-auto px-5 py-5 sm:px-6">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">
@@ -338,7 +402,7 @@ export default function List() {
               </label>
             </div>
 
-            {/* ACCIONES MODAL */}
+            {/* BOTONES */}
             <div className="flex flex-col-reverse gap-2 border-t border-gray-100 bg-gray-50 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
               <button
                 onClick={() => setOpen(false)}
