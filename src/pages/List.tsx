@@ -1,9 +1,9 @@
-
 import { useEffect, useState } from "react";
 import {
   getAnnouncements,
   updateAnnouncement,
   createAnnouncement,
+  deleteAnnouncement,
 } from "../api/announcement.api";
 
 export default function List() {
@@ -45,6 +45,21 @@ export default function List() {
     });
     setIsCreating(true);
     setOpen(true);
+  };
+
+  const handleDelete = async (a: any) => {
+    const confirmar = window.confirm(
+      `¿Seguro que deseas eliminar el anuncio "${a.name}"? Esta acción no se puede deshacer.`
+    );
+    if (!confirmar) return;
+
+    try {
+      await deleteAnnouncement(a.id);
+      fetchData();
+    } catch (error) {
+      console.error("Error al eliminar:", error);
+      alert("No se pudo eliminar el anuncio");
+    }
   };
 
   const formatTime = (time: string) =>
@@ -149,10 +164,10 @@ export default function List() {
             </div>
 
             {/* ACCIONES */}
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => toggleActive(a)}
-                className={`flex-1 rounded-lg px-2 py-2.5 text-sm font-semibold text-white transition active:scale-95 ${
+                className={`flex-1 min-w-[100px] rounded-lg px-2 py-2.5 text-sm font-semibold text-white transition active:scale-95 ${
                   a.isActive
                     ? "bg-red-500 hover:bg-red-600"
                     : "bg-green-500 hover:bg-green-600"
@@ -163,9 +178,16 @@ export default function List() {
 
               <button
                 onClick={() => handleEdit(a)}
-                className="flex-1 rounded-lg bg-blue-600 px-2 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-95"
+                className="flex-1 min-w-[100px] rounded-lg bg-blue-600 px-2 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 active:scale-95"
               >
                 Editar
+              </button>
+
+              <button
+                onClick={() => handleDelete(a)}
+                className="flex-1 min-w-[100px] rounded-lg bg-red-700 px-2 py-2.5 text-sm font-semibold text-white transition hover:bg-red-800 active:scale-95"
+              >
+                Eliminar
               </button>
             </div>
           </div>
@@ -244,6 +266,13 @@ export default function List() {
                         className="min-w-20 rounded-lg bg-blue-500 px-3 py-2 text-xs font-semibold text-white transition hover:bg-blue-600 active:scale-95"
                       >
                         Editar
+                      </button>
+
+                      <button
+                        onClick={() => handleDelete(a)}
+                        className="min-w-20 rounded-lg bg-red-700 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-800 active:scale-95"
+                      >
+                        Eliminar
                       </button>
                     </div>
                   </td>
