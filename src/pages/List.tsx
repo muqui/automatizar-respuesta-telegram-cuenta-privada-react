@@ -5,9 +5,11 @@ import {
   createAnnouncement,
   deleteAnnouncement,
 } from "../api/announcement.api";
+import { getTemplates } from "../api/template.api";
 
 export default function List() {
   const [data, setData] = useState<any[]>([]);
+  const [templates, setTemplates] = useState<any[]>([]);
   const [selected, setSelected] = useState<any>(null);
   const [open, setOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -16,8 +18,13 @@ export default function List() {
     getAnnouncements().then((res) => setData(res.data));
   };
 
+  const fetchTemplates = () => {
+    getTemplates().then((res) => setTemplates(res.data));
+  };
+
   useEffect(() => {
     fetchData();
+    fetchTemplates();
   }, []);
 
   const toggleActive = async (a: any) => {
@@ -86,6 +93,11 @@ export default function List() {
     fetchData();
   };
 
+  // Busca el template seleccionado para mostrar info adicional
+  const selectedTemplate = templates.find(
+    (t) => t.messageId === Number(selected?.savedMessageId)
+  );
+
   return (
     <div className="min-h-screen bg-gray-50 p-3 sm:p-5 md:p-6 lg:p-8">
       {/* ENCABEZADO */}
@@ -114,7 +126,6 @@ export default function List() {
             key={a.id}
             className="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:shadow-md"
           >
-            {/* NOMBRE Y ESTADO */}
             <div className="mb-4 flex min-w-0 items-start justify-between gap-3">
               <div className="min-w-0 flex-1">
                 <p className="mb-1 text-xs font-medium text-gray-400">
@@ -136,7 +147,6 @@ export default function List() {
               </span>
             </div>
 
-            {/* INFORMACION */}
             <div className="mb-4 space-y-3 rounded-lg bg-gray-50 p-3">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-sm text-gray-500">
@@ -163,7 +173,6 @@ export default function List() {
               </div>
             </div>
 
-            {/* ACCIONES */}
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => toggleActive(a)}
@@ -287,7 +296,6 @@ export default function List() {
       {open && selected && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-sm sm:p-5">
           <div className="my-auto flex max-h-[calc(100dvh-24px)] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-h-[calc(100dvh-40px)]">
-            {/* CABECERA */}
             <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4 sm:px-6">
               <div>
                 <h2 className="text-xl font-bold text-gray-800">
@@ -307,7 +315,6 @@ export default function List() {
               </button>
             </div>
 
-            {/* FORMULARIO */}
             <div className="flex flex-col gap-4 overflow-y-auto px-5 py-5 sm:px-6">
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">
@@ -395,14 +402,13 @@ export default function List() {
                 </div>
               </div>
 
+              {/* SELECT DE TEMPLATES */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-gray-700">
-                  Saved Message ID
+                  Plantilla (Saved Message)
                 </label>
-                <input
-                  type="number"
-                  className="w-full rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  placeholder="ID del mensaje guardado"
+                <select
+                  className="w-full rounded-lg border border-gray-300 bg-white p-3 text-sm text-gray-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                   value={selected.savedMessageId || ""}
                   onChange={(e) =>
                     setSelected({
@@ -410,7 +416,26 @@ export default function List() {
                       savedMessageId: e.target.value,
                     })
                   }
-                />
+                >
+                  <option value="">-- Selecciona una plantilla --</option>
+                  {templates.map((t) => (
+                    <option key={t.id} value={t.messageId}>
+                      {t.keyword && t.keyword.trim() !== ""
+                        ? `${t.keyword} (msgId: ${t.messageId})`
+                        : `Sin keyword (msgId: ${t.messageId})`}
+                    </option>
+                  ))}
+                </select>
+
+                {selectedTemplate && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Template #{selectedTemplate.id} · messageId{" "}
+                    {selectedTemplate.messageId}
+                    {selectedTemplate.keyword
+                      ? ` · keyword: ${selectedTemplate.keyword}`
+                      : ""}
+                  </p>
+                )}
               </div>
 
               <label className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition hover:bg-gray-100">
@@ -431,7 +456,6 @@ export default function List() {
               </label>
             </div>
 
-            {/* BOTONES */}
             <div className="flex flex-col-reverse gap-2 border-t border-gray-100 bg-gray-50 px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
               <button
                 onClick={() => setOpen(false)}
