@@ -1,17 +1,10 @@
+// src/App.tsx
 
-
-import './App.css'
-import List from './pages/List'
+import "./App.css";
+import AnnouncementsPage from "./pages/AnnouncementsPage";
 
 function App() {
- return (
-    <>
-     
-       <div>
-      <List />
-    </div>
-    </>
-  )
+  return <AnnouncementsPage />;
 }
 
-export default App
+export default App;
