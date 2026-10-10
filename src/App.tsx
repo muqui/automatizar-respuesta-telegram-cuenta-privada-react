@@ -1,10 +1,11 @@
 // src/App.tsx
 
+import { RouterProvider } from "react-router-dom";
+import { router } from "./router";
 import "./App.css";
-import AnnouncementsPage from "./pages/AnnouncementsPage";
 
 function App() {
-  return <AnnouncementsPage />;
+  return <RouterProvider router={router} />;
 }
 
 export default App;

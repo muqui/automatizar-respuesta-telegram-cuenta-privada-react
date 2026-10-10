@@ -8,9 +8,12 @@ import {
   deleteAnnouncement,
 } from "../api/announcement.api";
 import { getTemplates } from "../api/template.api";
-import { AnnouncementCard, AnnouncementHeader, AnnouncementModal, AnnouncementTable } from "../assets/components/announcements";
-
-
+import {
+  AnnouncementCard,
+  AnnouncementHeader,
+  AnnouncementModal,
+  AnnouncementTable,
+} from "../assets/components/announcements";
 
 export default function AnnouncementsPage() {
   const [data, setData] = useState<any[]>([]);
@@ -45,13 +48,32 @@ export default function AnnouncementsPage() {
     setOpen(true);
   };
 
+  // 🔥 Pre-rellenar fechas y horas al crear
   const handleCreateOpen = () => {
+    const today = new Date();
+
+    // Fecha inicio: 2 días antes
+    const start = new Date(today);
+    start.setDate(start.getDate() - 2);
+
+    // Fecha fin: 2 días después
+    const end = new Date(today);
+    end.setDate(end.getDate() + 2);
+
+    // Formatear a YYYY-MM-DD (formato del input type="date")
+    const formatDate = (d: Date) => {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
     setSelected({
       name: "",
-      startDate: "",
-      endDate: "",
-      startTime: "",
-      endTime: "",
+      startDate: formatDate(start),   // 🔥 2 días antes
+      endDate: formatDate(end),       // 🔥 2 días después
+      startTime: "00:01",             // 🔥 12:01 AM
+      endTime: "23:59",               // 🔥 11:59 PM
       isActive: true,
       savedMessageId: "",
     });
