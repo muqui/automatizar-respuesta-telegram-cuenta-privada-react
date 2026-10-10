@@ -174,7 +174,7 @@ export default function QueuePage() {
   };
 
   // 🔥 Solo las pendientes se pueden reordenar
-  const sortable = data.filter((q) => !q.isSent);
+  //const sortable = data.filter((q) => !q.isSent);
   const isSortable = filter === "pending" || filter === "all";
 
   return (
