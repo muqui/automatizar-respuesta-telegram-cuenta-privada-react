@@ -27,10 +27,44 @@ import {
   reorderQueue,
 } from "../api/queue.api";
 
-// ── Fila sortable ──────────────────────────────────────────
-function SortableRow({ q }: { q: any }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: q.id });
+// ── Helpers ────────────────────────────────────────────────
+const formatDate = (date: string) => {
+  if (!date) return "—";
+  return new Date(date).toLocaleString("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const formatDateFull = (date: string) => {
+  if (!date) return "—";
+  return new Date(date).toLocaleString("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+// ── Card sortable (móvil) ──────────────────────────────────
+function SortableCard({
+  q,
+  onDelete,
+}: {
+  q: any;
+  onDelete: (q: any) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: q.id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -38,14 +72,81 @@ function SortableRow({ q }: { q: any }) {
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const formatDate = (date: string) => {
-    if (!date) return "—";
-    return new Date(date).toLocaleString("es-MX", {
-      day: "2-digit",
-      month: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`overflow-hidden rounded-xl border bg-white p-4 shadow-sm ${
+        isDragging ? "border-blue-400 bg-blue-50" : "border-gray-200"
+      }`}
+    >
+      <div className="mb-3 flex items-start justify-between gap-2">
+        {/* 🔥 Handle de drag (móvil) */}
+        <div
+          {...attributes}
+          {...listeners}
+          className="-ml-2 -mt-2 cursor-grab rounded-lg p-2 text-gray-400 active:cursor-grabbing"
+          title="Arrastra para reordenar"
+        >
+          ⋮⋮
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-xs text-gray-400">#{q.id}</p>
+          <h3 className="mt-1 break-words font-bold text-gray-800">
+            📢 {q.announcement?.name ?? `#${q.announcementId}`}
+          </h3>
+        </div>
+      </div>
+
+      <div className="space-y-2 rounded-lg bg-gray-50 p-3 text-sm">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-gray-500">📺 Canal</span>
+          <span className="text-right font-medium text-gray-800">
+            {q.channel?.name ?? `#${q.channelId}`}
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-gray-500">🕐 Programado</span>
+          <span className="text-right text-xs font-medium text-gray-800">
+            {formatDateFull(q.scheduledAt)}
+          </span>
+        </div>
+      </div>
+
+      {/* 🔥 Botón eliminar (móvil) */}
+      <button
+        onClick={() => onDelete(q)}
+        className="mt-3 w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700"
+      >
+        🗑️ Eliminar
+      </button>
+    </div>
+  );
+}
+
+// ── Fila sortable (escritorio) ─────────────────────────────
+function SortableRow({
+  q,
+  onDelete,
+}: {
+  q: any;
+  onDelete: (q: any) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: q.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
   };
 
   return (
@@ -56,11 +157,12 @@ function SortableRow({ q }: { q: any }) {
         isDragging ? "bg-blue-50" : "hover:bg-gray-50"
       }`}
     >
-      {/* 🔥 Handle de drag */}
+      {/* Handle de drag */}
       <td
         {...attributes}
         {...listeners}
         className="cursor-grab px-4 py-3 text-center text-gray-400 active:cursor-grabbing"
+        title="Arrastra para reordenar"
       >
         ⋮⋮
       </td>
@@ -77,6 +179,17 @@ function SortableRow({ q }: { q: any }) {
 
       <td className="px-4 py-3 text-xs text-gray-600">
         {formatDate(q.scheduledAt)}
+      </td>
+
+      {/* 🔥 Botón eliminar (escritorio) */}
+      <td className="px-4 py-3 text-center">
+        <button
+          onClick={() => onDelete(q)}
+          className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700 active:scale-95"
+          title="Eliminar de la cola"
+        >
+          🗑️
+        </button>
       </td>
     </tr>
   );
@@ -124,7 +237,7 @@ export default function QueuePage() {
     }),
   );
 
-  // 🔥 Drag end: reordenar
+  // 🔥 Drag end
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
 
@@ -133,25 +246,31 @@ export default function QueuePage() {
     const oldIndex = data.findIndex((q) => q.id === active.id);
     const newIndex = data.findIndex((q) => q.id === over.id);
 
-    // Reordenar en el estado local (optimistic UI)
     const newData = arrayMove(data, oldIndex, newIndex);
     setData(newData);
 
-    // Guardar en el backend
     setSaving(true);
     try {
       await reorderQueue(newData.map((q) => q.id));
     } catch (error) {
       console.error("Error al reordenar:", error);
       alert("No se pudo guardar el nuevo orden");
-      fetchData(); // revertir
+      fetchData();
     } finally {
       setSaving(false);
     }
   };
 
+  // 🔥 Eliminar
   const handleDelete = async (q: any) => {
-    if (!window.confirm(`¿Eliminar el envío #${q.id}?`)) return;
+    const confirmar = window.confirm(
+      `¿Eliminar el envío #${q.id}?\n\n` +
+        `Anuncio: ${q.announcement?.name ?? `#${q.announcementId}`}\n` +
+        `Canal: ${q.channel?.name ?? `#${q.channelId}`}\n` +
+        `Programado: ${formatDateFull(q.scheduledAt)}`,
+    );
+
+    if (!confirmar) return;
 
     try {
       await deleteQueueItem(q.id);
@@ -162,19 +281,6 @@ export default function QueuePage() {
     }
   };
 
-  const formatDate = (date: string) => {
-    if (!date) return "—";
-    return new Date(date).toLocaleString("es-MX", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  // 🔥 Solo las pendientes se pueden reordenar
-  //const sortable = data.filter((q) => !q.isSent);
   const isSortable = filter === "pending" || filter === "all";
 
   return (
@@ -185,7 +291,7 @@ export default function QueuePage() {
         </h1>
         <p className="mt-1 text-sm text-gray-500">
           {isSortable
-            ? "Arrastra las filas para reordenar los envíos pendientes"
+            ? "Arrastra ⋮⋮ para reordenar los envíos pendientes"
             : "Anuncios programados y su estado"}
         </p>
       </div>
@@ -254,49 +360,72 @@ export default function QueuePage() {
         <p className="p-6 text-center text-gray-500">Cargando...</p>
       ) : (
         <>
-          {/* 📱 Móvil */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:hidden">
-            {data.map((q) => (
-              <div
-                key={q.id}
-                className="overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+          {/* 📱 Móvil: cards sortables */}
+          <div className="lg:hidden">
+            {isSortable ? (
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleDragEnd}
               >
-                <div className="mb-3 flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <p className="text-xs text-gray-400">#{q.id}</p>
-                    <h3 className="mt-1 break-words font-bold text-gray-800">
-                      📢 {q.announcement?.name ?? `#${q.announcementId}`}
-                    </h3>
-                  </div>
-                </div>
-
-                <div className="space-y-2 rounded-lg bg-gray-50 p-3 text-sm">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-gray-500">📺 Canal</span>
-                    <span className="text-right font-medium text-gray-800">
-                      {q.channel?.name ?? `#${q.channelId}`}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-gray-500">🕐 Programado</span>
-                    <span className="text-right text-xs font-medium text-gray-800">
-                      {formatDate(q.scheduledAt)}
-                    </span>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => handleDelete(q)}
-                  className="mt-3 w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700"
+                <SortableContext
+                  items={data.map((q) => q.id)}
+                  strategy={verticalListSortingStrategy}
                 >
-                  🗑️ Eliminar
-                </button>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {data.map((q) => (
+                      <SortableCard
+                        key={q.id}
+                        q={q}
+                        onDelete={handleDelete}
+                      />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            ) : (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {data.map((q) => (
+                  <div
+                    key={q.id}
+                    className="overflow-hidden rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+                  >
+                    <div className="mb-3">
+                      <p className="text-xs text-gray-400">#{q.id}</p>
+                      <h3 className="mt-1 break-words font-bold text-gray-800">
+                        📢 {q.announcement?.name ?? `#${q.announcementId}`}
+                      </h3>
+                    </div>
+
+                    <div className="space-y-2 rounded-lg bg-gray-50 p-3 text-sm">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-gray-500">📺 Canal</span>
+                        <span className="text-right font-medium text-gray-800">
+                          {q.channel?.name ?? `#${q.channelId}`}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-gray-500">🕐 Programado</span>
+                        <span className="text-right text-xs font-medium text-gray-800">
+                          {formatDateFull(q.scheduledAt)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleDelete(q)}
+                      className="mt-3 w-full rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700"
+                    >
+                      🗑️ Eliminar
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
+            )}
           </div>
 
-          {/* 🖥️ Escritorio con drag & drop */}
+          {/* 🖥️ Escritorio: tabla sortable */}
           <div className="hidden overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm lg:block">
             <div className="overflow-x-auto">
               {isSortable ? (
@@ -334,7 +463,11 @@ export default function QueuePage() {
                       </thead>
                       <tbody>
                         {data.map((q) => (
-                          <SortableRow key={q.id} q={q} />
+                          <SortableRow
+                            key={q.id}
+                            q={q}
+                            onDelete={handleDelete}
+                          />
                         ))}
                       </tbody>
                     </table>
@@ -356,6 +489,9 @@ export default function QueuePage() {
                       <th className="px-4 py-3 text-left font-semibold text-gray-600">
                         Programado
                       </th>
+                      <th className="px-4 py-3 text-center font-semibold text-gray-600">
+                        Acciones
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
@@ -370,6 +506,15 @@ export default function QueuePage() {
                         </td>
                         <td className="px-4 py-3 text-xs text-gray-600">
                           {formatDate(q.scheduledAt)}
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <button
+                            onClick={() => handleDelete(q)}
+                            className="rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-red-700 active:scale-95"
+                            title="Eliminar de la cola"
+                          >
+                            🗑️
+                          </button>
                         </td>
                       </tr>
                     ))}
