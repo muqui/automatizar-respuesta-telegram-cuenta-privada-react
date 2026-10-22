@@ -22,6 +22,7 @@ const MENU_ITEMS = [
     label: "Plantillas",
     icon: "📄",
   },
+   { to: "/cron-settings", label: "Configuración", icon: "⚙️" },
 ];
 
 export default function Sidebar({ isOpen, onClose }: Props) {

@@ -7,6 +7,7 @@ import AnnouncementsPage from "../pages/AnnouncementsPage";
 import QueuePage from "../pages/QueuePage";
 import TemplatesPage from "../pages/TemplatesPage";
 import Layout from "../assets/components/layout/Layout";
+import CronSettingsPage from "../pages/CronSettingsPage";
 
 
 export const router = createBrowserRouter([
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
         path: "templates",
         element: <TemplatesPage />,
       },
+      {
+  path: "cron-settings",
+  element: <CronSettingsPage />,
+}
     ],
   },
   {
