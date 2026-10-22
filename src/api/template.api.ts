@@ -1,6 +1,10 @@
+// src/api/template.api.ts
+
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3008';
 const API = `${API_URL}/templates`;
 
 export const getTemplates = () => axios.get(API);
+export const getTemplatesCount = () => axios.get(`${API}/count`);
+export const rescanTemplates = () => axios.post(`${API}/rescan`);

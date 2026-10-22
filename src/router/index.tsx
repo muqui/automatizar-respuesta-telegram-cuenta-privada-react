@@ -8,6 +8,7 @@ import QueuePage from "../pages/QueuePage";
 import TemplatesPage from "../pages/TemplatesPage";
 import Layout from "../assets/components/layout/Layout";
 import CronSettingsPage from "../pages/CronSettingsPage";
+import ChannelsPage from "../pages/ChannelsPage";
 
 
 export const router = createBrowserRouter([
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
       {
   path: "cron-settings",
   element: <CronSettingsPage />,
+},
+{
+  path: "channels",
+  element: <ChannelsPage />,
 }
     ],
   },

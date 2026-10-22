@@ -23,6 +23,7 @@ const MENU_ITEMS = [
     icon: "📄",
   },
    { to: "/cron-settings", label: "Configuración", icon: "⚙️" },
+   { to: "/channels", label: "Canales", icon: "📺" },     
 ];
 
 export default function Sidebar({ isOpen, onClose }: Props) {
