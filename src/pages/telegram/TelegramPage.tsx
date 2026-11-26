@@ -39,6 +39,22 @@ export default function TelegramPage() {
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [error, setError] = useState('');
 
+  // Navegación móvil
+  const [showMobileMessages, setShowMobileMessages] = useState(false);
+
+  // Búsqueda
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filtrar conversaciones por nombre o username
+  const filteredChats = chats.filter((chat) => {
+    const search = searchTerm.trim().toLowerCase();
+
+    return (
+      chat.title.toLowerCase().includes(search) ||
+      chat.username?.toLowerCase().includes(search)
+    );
+  });
+
   // Cargar conversaciones
   const loadChats = async () => {
     try {
@@ -56,7 +72,7 @@ export default function TelegramPage() {
           const existing = data.find(
             (chat) =>
               chat.id === current.id &&
-              chat.accountId === current.accountId,
+              chat.accountId === current.accountId
           );
 
           if (existing) return existing;
@@ -84,7 +100,7 @@ export default function TelegramPage() {
 
       const response = await getTelegramMessages(
         selectedChat.id,
-        selectedChat.accountId,
+        selectedChat.accountId
       );
 
       setMessages(response.data);
@@ -96,16 +112,20 @@ export default function TelegramPage() {
     }
   };
 
+  // Actualizar conversaciones al cambiar de cuenta
   useEffect(() => {
     setSelectedChat(null);
     setMessages([]);
+    setShowMobileMessages(false);
     loadChats();
   }, [accountId]);
 
+  // Actualizar mensajes al cambiar de conversación
   useEffect(() => {
     loadMessages();
   }, [selectedChat?.id, selectedChat?.accountId]);
 
+  // Formatear hora
   const formatTime = (date: string) => {
     return new Date(date).toLocaleTimeString('es-MX', {
       hour: '2-digit',
@@ -113,6 +133,7 @@ export default function TelegramPage() {
     });
   };
 
+  // Formatear fecha
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('es-MX', {
       day: 'numeric',
@@ -122,14 +143,22 @@ export default function TelegramPage() {
   };
 
   return (
-    <div className="h-[calc(100vh-2rem)] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+    <div className="h-[calc(100dvh-2rem)] min-h-0 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
 
-      <div className="flex h-full">
+      <div className="flex h-full min-h-0">
 
         {/* LISTA DE CONVERSACIONES */}
-        <aside className="flex w-full flex-col border-r border-gray-200 md:w-80 lg:w-96">
+        <aside
+          className={`
+            ${showMobileMessages ? 'hidden' : 'flex'}
+            w-full min-h-0 flex-col border-r border-gray-200
+            md:flex md:w-80 lg:w-96 md:shrink-0
+          `}
+        >
 
-          <div className="border-b border-gray-200 p-4">
+          {/* CABECERA */}
+          <div className="shrink-0 border-b border-gray-200 p-4">
+
             <div className="mb-4 flex items-center justify-between">
               <h1 className="text-xl font-bold text-gray-800">
                 Telegram
@@ -166,8 +195,39 @@ export default function TelegramPage() {
             </div>
           </div>
 
+          {/* BUSCADOR */}
+          <div className="shrink-0 border-b border-gray-200 p-3">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Buscar por nombre o usuario..."
+                className="w-full rounded-lg border border-gray-200 bg-gray-50 py-3 pl-10 pr-10 text-sm text-gray-700 outline-none transition focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+              />
+
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                🔍
+              </span>
+
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                  aria-label="Limpiar búsqueda"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+
+            <p className="mt-2 text-xs text-gray-400">
+              {filteredChats.length} de {chats.length} conversaciones
+            </p>
+          </div>
+
           {/* CONTACTOS */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="min-h-0 flex-1 overflow-y-auto">
 
             {loadingChats && chats.length === 0 && (
               <p className="p-6 text-center text-sm text-gray-500">
@@ -175,17 +235,20 @@ export default function TelegramPage() {
               </p>
             )}
 
-            {!loadingChats && chats.length === 0 && (
+            {!loadingChats && filteredChats.length === 0 && (
               <p className="p-6 text-center text-sm text-gray-500">
-                No hay conversaciones disponibles.
+                {searchTerm
+                  ? 'No se encontraron conversaciones.'
+                  : 'No hay conversaciones disponibles.'}
               </p>
             )}
 
-            {chats.map((chat) => (
+            {filteredChats.map((chat) => (
               <button
                 key={`${chat.accountId}-${chat.id}`}
                 onClick={() => {
                   setSelectedChat(chat);
+                  setShowMobileMessages(true);
                   setError('');
                 }}
                 className={`flex w-full items-center gap-3 border-b border-gray-100 p-4 text-left transition hover:bg-gray-50 ${
@@ -195,6 +258,7 @@ export default function TelegramPage() {
                     : ''
                 }`}
               >
+
                 {/* AVATAR */}
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-600 text-lg font-bold text-white">
                   {chat.title?.charAt(0).toUpperCase() || '?'}
@@ -228,17 +292,34 @@ export default function TelegramPage() {
         </aside>
 
         {/* PANEL DE MENSAJES */}
-        <main className="hidden min-w-0 flex-1 flex-col bg-gray-100 md:flex">
+        <main
+          className={`
+            ${showMobileMessages ? 'flex' : 'hidden'}
+            min-w-0 min-h-0 flex-1 flex-col bg-gray-100
+            md:flex
+          `}
+        >
 
           {selectedChat ? (
             <>
+
               {/* CABECERA */}
-              <header className="flex items-center gap-3 border-b border-gray-200 bg-white p-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 font-bold text-white">
+              <header className="flex shrink-0 items-center gap-3 border-b border-gray-200 bg-white p-3 sm:p-4">
+
+                {/* REGRESAR EN MÓVIL */}
+                <button
+                  onClick={() => setShowMobileMessages(false)}
+                  className="shrink-0 rounded-lg bg-gray-100 px-3 py-2 text-gray-700 hover:bg-gray-200 md:hidden"
+                  aria-label="Regresar a conversaciones"
+                >
+                  ←
+                </button>
+
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 font-bold text-white sm:h-11 sm:w-11">
                   {selectedChat.title?.charAt(0).toUpperCase()}
                 </div>
 
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h2 className="truncate font-bold text-gray-800">
                     {selectedChat.title}
                   </h2>
@@ -253,14 +334,16 @@ export default function TelegramPage() {
 
                 <button
                   onClick={loadMessages}
-                  className="ml-auto rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-600 hover:bg-gray-200"
+                  disabled={loadingMessages}
+                  className="shrink-0 rounded-lg bg-gray-100 px-3 py-2 text-sm text-gray-600 hover:bg-gray-200 disabled:opacity-50"
+                  aria-label="Actualizar mensajes"
                 >
                   ↻
                 </button>
               </header>
 
               {/* HISTORIAL */}
-              <section className="flex-1 space-y-3 overflow-y-auto p-4 lg:p-6">
+              <section className="min-h-0 flex-1 space-y-3 overflow-y-auto p-3 sm:p-4 lg:p-6">
 
                 {loadingMessages && (
                   <p className="text-center text-sm text-gray-500">
@@ -276,16 +359,16 @@ export default function TelegramPage() {
 
                 {messages.map((message, index) => {
                   const outgoing = message.direction === 'outgoing';
-
                   const previous = messages[index - 1];
 
                   const showDate =
                     !previous ||
                     new Date(previous.messageDate).toDateString() !==
-                    new Date(message.messageDate).toDateString();
+                      new Date(message.messageDate).toDateString();
 
                   return (
                     <div key={message.id}>
+
                       {showDate && (
                         <div className="my-5 text-center">
                           <span className="rounded-full bg-gray-300 px-3 py-1 text-xs text-gray-700">
@@ -300,7 +383,7 @@ export default function TelegramPage() {
                         }`}
                       >
                         <div
-                          className={`max-w-[80%] rounded-2xl px-4 py-2 shadow-sm ${
+                          className={`max-w-[85%] break-words rounded-2xl px-4 py-2 shadow-sm sm:max-w-[80%] ${
                             outgoing
                               ? 'rounded-br-sm bg-blue-600 text-white'
                               : 'rounded-bl-sm bg-white text-gray-800'
@@ -326,22 +409,24 @@ export default function TelegramPage() {
               </section>
 
               {/* SOLO LECTURA */}
-              <footer className="border-t border-gray-200 bg-white p-3">
+              <footer className="shrink-0 border-t border-gray-200 bg-white p-3">
                 <p className="text-center text-xs text-gray-400">
                   Modo de solo lectura · El envío de mensajes se habilitará posteriormente.
                 </p>
               </footer>
+
             </>
           ) : (
-            <div className="flex flex-1 items-center justify-center text-gray-400">
+            <div className="flex flex-1 items-center justify-center p-4 text-center text-gray-400">
               Selecciona una conversación para ver los mensajes.
             </div>
           )}
         </main>
       </div>
 
+      {/* ERROR */}
       {error && (
-        <div className="absolute bottom-4 right-4 rounded-lg bg-red-100 px-4 py-3 text-sm text-red-700 shadow">
+        <div className="fixed bottom-4 right-4 z-50 max-w-[90%] rounded-lg bg-red-100 px-4 py-3 text-sm text-red-700 shadow">
           {error}
         </div>
       )}
