@@ -24,6 +24,11 @@ const MENU_ITEMS = [
   },
    { to: "/cron-settings", label: "Configuración", icon: "⚙️" },
    { to: "/channels", label: "Canales", icon: "📺" },     
+   {
+  to: "/telegram",
+  label: "Telegram",
+  icon: "💬",
+},
 ];
 
 export default function Sidebar({ isOpen, onClose }: Props) {

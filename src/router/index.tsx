@@ -9,6 +9,7 @@ import TemplatesPage from "../pages/TemplatesPage";
 import Layout from "../assets/components/layout/Layout";
 import CronSettingsPage from "../pages/CronSettingsPage";
 import ChannelsPage from "../pages/ChannelsPage";
+import TelegramPage from "../pages/telegram/TelegramPage";
 
 
 export const router = createBrowserRouter([
@@ -46,4 +47,8 @@ export const router = createBrowserRouter([
     path: "*",
     element: <Navigate to="/announcements" replace />,
   },
+  {
+  path: "telegram",
+  element: <TelegramPage />,
+},
 ]);
