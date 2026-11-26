@@ -10,6 +10,7 @@ import Layout from "../assets/components/layout/Layout";
 import CronSettingsPage from "../pages/CronSettingsPage";
 import ChannelsPage from "../pages/ChannelsPage";
 import TelegramPage from "../pages/telegram/TelegramPage";
+import ChatLock from "../assets/components/proteger/ChatLock";
 
 
 export const router = createBrowserRouter([
@@ -48,7 +49,11 @@ export const router = createBrowserRouter([
     element: <Navigate to="/announcements" replace />,
   },
   {
-  path: "telegram",
-  element: <TelegramPage />,
-},
+        path: "telegram",
+        element: (
+          <ChatLock>
+            <TelegramPage />
+          </ChatLock>
+        ),
+      },
 ]);
